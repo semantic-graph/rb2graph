@@ -29,11 +29,25 @@ def addEdge(u, v, edge_type)
     end
 end
 
+def const_to_string(c)
+    if c.children[0] != nil && c.children[0].type == :const
+        return "#{const_to_string(c.children[0])}.#{c.children[1]}"
+    end
+    return "#{c.children[1]}"
+end
+
+def get_callee_node_from_send_children(children)
+    if children[0] != nil && children[0].type == :const
+        return "#{const_to_string(children[0])}.#{children[1]}"
+    end
+    return "#{children[1]}"
+end
+
 def traverse_call_children(callee, children)
     children.each do |child|
         puts "- #{child}"
         if child.type == :send
-            child_callee = child.children[1]
+            child_callee = get_callee_node_from_send_children(child.children)
             traverse_call_children(child_callee, child.children.drop(2))
             addEdge(getNode(child_callee), getNode(callee), "data")
         elsif child.type == :str
@@ -49,7 +63,7 @@ def traverse(node, context)
             context = node.children[0]
         end
         if node.type == :send
-            callee = node.children[1]
+            callee = get_callee_node_from_send_children(node.children)
             puts "---- Children of #{callee}---"
             traverse_call_children(callee, node.children.drop(2))
             addEdge(getNode(context), getNode(callee), "control")
