@@ -1,6 +1,6 @@
 import json
 import sys
-from pygraphviz import *
+from pygraphviz import AGraph
 
 json_in = sys.argv[1]
 
